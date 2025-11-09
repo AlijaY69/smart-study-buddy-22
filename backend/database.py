@@ -71,6 +71,7 @@ def insert_event(data):
 def detect_if_assignment(event_title):
     """
     Detect if calendar event is an assignment/exam using keywords.
+    Excludes study sessions (events with 'study' prefix or study-related patterns).
     Returns: boolean
     """
     assignment_keywords = [
@@ -78,8 +79,19 @@ def detect_if_assignment(event_title):
         'assignment', 'homework', 'project', 'presentation',
         'essay', 'paper', 'due', 'deadline', 'submit'
     ]
-    
-    title_lower = event_title.lower()
+
+    title_lower = event_title.lower().strip()
+
+    # Exclude study sessions - common patterns:
+    # - "Study: ..." or "Study - ..."
+    # - "Study session"
+    # - Events that start with "study" followed by colon or dash
+    if (title_lower.startswith('study:') or
+        title_lower.startswith('study -') or
+        'study session' in title_lower or
+        title_lower.startswith('📚 study')):
+        return False
+
     return any(keyword in title_lower for keyword in assignment_keywords)
 
 def get_unprocessed_assignments():

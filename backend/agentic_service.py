@@ -10,7 +10,7 @@ This module implements the agentic AI behavior:
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta, timezone
 from database import get_upcoming_assignments, mark_reminder_sent, extract_assignment_info, get_unprocessed_assignments
-from email_service import send_exam_reminder, send_new_assignment_notification
+from email_service import send_new_assignment_notification
 from calendar_reader import list_and_store_events
 from assignment_sync import get_supabase_client, sync_calendar_to_assignments, mark_assignment_notification_sent
 import requests
@@ -127,86 +127,10 @@ class AgenticStudyCompanion:
                     print(f"      Use email: {USER_EMAIL}")
                     print(f"   ✅ Assignments will sync automatically once you're logged in!")
             
-            # Get assignments in next 7 days that haven't been notified
-            upcoming = get_upcoming_assignments(days_ahead=CHECK_DAYS_AHEAD)
-            
-            if not upcoming:
-                print("✅ [AGENT] No new exams requiring notification")
-                print("="*60 + "\n")
-                return
-            
-            print(f"📚 [AGENT] Found {len(upcoming)} exam(s) requiring notification:")
-            
-            for assignment in upcoming:
-                try:
-                    # Extract exam details
-                    exam_info = extract_assignment_info(
-                        assignment['details'],
-                        assignment['datetime']
-                    )
-                    
-                    # Calculate days until exam (handle timezone-aware datetimes)
-                    try:
-                        exam_date_str = assignment['datetime']
-                        # Handle timezone-aware strings
-                        if '+' in exam_date_str or exam_date_str.endswith('Z'):
-                            exam_date = datetime.fromisoformat(exam_date_str.replace('Z', '+00:00'))
-                        else:
-                            # If timezone-naive, assume local timezone
-                            exam_date = datetime.fromisoformat(exam_date_str)
-                            # Make it timezone-aware (CET/CEST for Netherlands)
-                            exam_date = pytz.timezone('Europe/Amsterdam').localize(exam_date)
-                        
-                        # Get current time in same timezone
-                        now = datetime.now(exam_date.tzinfo) if exam_date.tzinfo else datetime.now()
-                        if exam_date.tzinfo and not now.tzinfo:
-                            # If exam_date is timezone-aware but now is not, make now aware
-                            now = pytz.timezone('Europe/Amsterdam').localize(now)
-                        
-                        days_until = (exam_date - now).days
-                    except Exception as dt_error:
-                        print(f"⚠️ [AGENT] DateTime parsing error: {str(dt_error)}")
-                        continue
-                    
-                    if days_until < 0:
-                        print(f"⏭️ [AGENT] Skipping past exam: {assignment['details']}")
-                        mark_reminder_sent(assignment['_id'])
-                        continue
-                    
-                    print(f"\n📧 [AGENT] Preparing reminder for:")
-                    print(f"   📚 {exam_info['title']}")
-                    print(f"   📅 {exam_info['due_date']}")
-                    print(f"   ⏰ In {days_until} day(s)")
-                    
-                    # Format exam details for email
-                    email_exam_details = {
-                        'title': exam_info['title'],
-                        'course': exam_info['course_name'],
-                        'date': exam_info['due_date'],
-                        'type': exam_info['type']
-                    }
-                    
-                    # Send proactive email reminder
-                    email_sent = send_exam_reminder(
-                        user_email=USER_EMAIL,
-                        exam_details=email_exam_details,
-                        days_until_exam=days_until
-                    )
-                    
-                    if email_sent:
-                        # Mark as notified to avoid spam
-                        mark_reminder_sent(assignment['_id'])
-                        self.notifications_sent += 1
-                        print(f"✅ [AGENT] Reminder sent successfully")
-                    else:
-                        print(f"⚠️ [AGENT] Failed to send reminder")
-                    
-                except Exception as e:
-                    print(f"❌ [AGENT] Error processing assignment: {str(e)}")
-                    continue
-            
-            print("\n" + "="*60)
-            print(f"📊 [AGENT] Summary: Sent {self.notifications_sent} total notifications")
+            # Disabled: Old exam reminder system
+            # Now only send notification when new assignment is first detected (above)
+            # No additional reminders are sent
+            print("✅ [AGENT] Assignment notifications handled during sync")
             print("="*60 + "\n")
             
         except Exception as e:
