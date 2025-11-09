@@ -200,11 +200,15 @@ export const exerciseService = {
 
     // Calculate overall readiness
     const allTopics = Object.keys(topicMastery);
-    const totalMastery = allTopics.reduce((sum, t) => {
-      const data = topicMastery[t];
-      return sum + (data.correct / data.total);
-    }, 0);
-    const overallReadiness = Math.round((totalMastery / allTopics.length) * 100);
+    let overallReadiness = 0;
+
+    if (allTopics.length > 0) {
+      const totalMastery = allTopics.reduce((sum, t) => {
+        const data = topicMastery[t];
+        return sum + (data.correct / data.total);
+      }, 0);
+      overallReadiness = Math.round((totalMastery / allTopics.length) * 100);
+    }
 
     // Upsert progress - specify the unique constraint columns
     const { error } = await supabase

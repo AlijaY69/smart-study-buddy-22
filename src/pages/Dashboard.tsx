@@ -65,16 +65,39 @@ export default function Dashboard() {
           .gte("scheduled_at", new Date().toISOString())
           .order("scheduled_at")
           .limit(5),
-        supabase.from("user_progress").select("*").eq("user_id", userId).maybeSingle(),
+        supabase.from("user_progress").select("*").eq("user_id", userId),
       ]);
 
       if (assignmentsRes.data) setAssignments(assignmentsRes.data);
       if (sessionsRes.data) setSessions(sessionsRes.data);
-      if (progressRes.data) {
+
+      // Calculate overall progress across all assignments
+      if (progressRes.data && progressRes.data.length > 0) {
+        const allProgress = progressRes.data;
+
+        // Calculate average readiness across all assignments
+        const totalReadiness = allProgress.reduce((sum, p) => sum + (p.overall_readiness || 0), 0);
+        const avgReadiness = Math.round(totalReadiness / allProgress.length);
+
+        // Collect all weak and strong topics across assignments
+        const allWeakTopics = new Set<string>();
+        const allStrongTopics = new Set<string>();
+
+        allProgress.forEach(p => {
+          (p.weak_topics || []).forEach((t: string) => allWeakTopics.add(t));
+          (p.strong_topics || []).forEach((t: string) => allStrongTopics.add(t));
+        });
+
         setProgress({
-          overall_readiness: progressRes.data.overall_readiness || 0,
-          weak_topics: progressRes.data.weak_topics || [],
-          strong_topics: progressRes.data.strong_topics || [],
+          overall_readiness: avgReadiness,
+          weak_topics: Array.from(allWeakTopics),
+          strong_topics: Array.from(allStrongTopics),
+        });
+      } else {
+        setProgress({
+          overall_readiness: 0,
+          weak_topics: [],
+          strong_topics: [],
         });
       }
     } catch (error: any) {
