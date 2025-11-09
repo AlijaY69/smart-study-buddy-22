@@ -16,9 +16,20 @@ from agentic_service import agent, start_agent, stop_agent, get_agent_status
 from email_service import send_test_email
 import traceback
 import atexit
+import os
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for React frontend
+
+# Configure CORS for both local development and production
+frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+allowed_origins = [
+    'http://localhost:5173',  # Local development
+    'http://localhost:8080',  # Vite preview
+    frontend_url,  # Production frontend URL
+    'https://*.pages.dev'  # Cloudflare Pages preview deployments
+]
+
+CORS(app, origins=allowed_origins, supports_credentials=True)
 
 # Stop agent gracefully when Flask shuts down
 atexit.register(stop_agent)
@@ -27,6 +38,11 @@ atexit.register(stop_agent)
 def health_check():
     """Health check endpoint."""
     return jsonify({'status': 'ok', 'service': 'Study Companion Calendar API'})
+
+@app.route('/api/health', methods=['GET'])
+def api_health_check():
+    """API Health check endpoint for Railway."""
+    return jsonify({'status': 'ok', 'service': 'Study Companion Calendar API', 'version': '1.0.0'})
 
 @app.route('/api/calendar/stats', methods=['GET'])
 def get_stats():
@@ -408,10 +424,13 @@ def reset_mongodb():
 if __name__ == '__main__':
     pass
     
+    # Get port from environment variable (Railway sets this)
+    port = int(os.getenv('PORT', 5001))
+    
     # Start the agentic AI agent
     start_agent()
     
     # Disable reloader to prevent scheduler conflicts
     # Set use_reloader=False when running with APScheduler
-    app.run(host='0.0.0.0', port=5001, debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 

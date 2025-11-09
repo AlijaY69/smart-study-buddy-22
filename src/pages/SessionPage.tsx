@@ -19,6 +19,7 @@ export default function SessionPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [generationProgress, setGenerationProgress] = useState<{ current: number; total: number } | null>(null);
 
   useEffect(() => {
     if (id) loadSessionAndExercises();
@@ -59,19 +60,24 @@ export default function SessionPage() {
     if (!id) return;
     
     setGenerating(true);
+    setGenerationProgress(null);
     try {
       toast.info("Generating personalized exercises...");
       
-      const result = await sessionService.generateExercisesForSession(id);
+      const result = await sessionService.generateExercisesForSession(id, (current, total) => {
+        setGenerationProgress({ current, total });
+      });
       
       await loadSessionAndExercises();
       
+      setGenerationProgress(null);
       toast.success(`Exercises generated! ${result?.length || 0} questions ready.`);
     } catch (error: any) {
       console.error("Exercise generation error:", error);
       toast.error(error.message || "Failed to generate exercises. Check console for details.");
     } finally {
       setGenerating(false);
+      setGenerationProgress(null);
     }
   };
 
@@ -186,7 +192,11 @@ export default function SessionPage() {
               </p>
               <Button onClick={generateExercises} disabled={generating} size="lg">
                 <Sparkles className="h-4 w-4 mr-2" />
-                {generating ? "Generating..." : "Generate Exercises"}
+                {generating 
+                  ? generationProgress 
+                    ? `Generating ${generationProgress.current}/${generationProgress.total}...` 
+                    : "Generating..." 
+                  : "Generate Exercises"}
               </Button>
             </CardContent>
           </Card>
