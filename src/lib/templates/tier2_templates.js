@@ -34,13 +34,23 @@ export const TIER2_TEMPLATES = {
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create questions based on SPECIFIC terms and concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Ask about terms or concepts that are explicitly mentioned in the materials above.`
+        : '';
+
       return `Generate a definition question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Ask student to define a specific term or concept related to the topic
+- Ask student to define a specific term or concept related to the topic${context.materialContent ? ' from the study materials' : ''}
 - Identify 3-4 key points that MUST be in a complete definition
 - Provide a sample answer that's 1-2 sentences and includes all key points
 - Set minKeyPoints to 2 (student must cover at least 2 of the key points)
@@ -120,13 +130,23 @@ Return this EXACT JSON structure:
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create questions based on SPECIFIC processes or concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Ask about processes or concepts that are explained in the materials above.`
+        : '';
+
       return `Generate an explanation question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Ask student to explain HOW something works or WHY something happens
+- Ask student to explain HOW something works or WHY something happens${context.materialContent ? ' based on the study materials' : ''}
 - Identify 3-5 key points that should be in a complete explanation
 - Provide a sample answer that's 3-4 sentences
 - Set minKeyPoints to 2-3 (depending on complexity)
@@ -229,13 +249,23 @@ Return ONLY this JSON:
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create comparison questions about SPECIFIC concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Compare concepts that are discussed in the materials above.`
+        : '';
+
       return `Generate a comparison question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Ask student to compare and contrast two related concepts
+- Ask student to compare and contrast two related concepts${context.materialContent ? ' from the study materials' : ''}
 - Identify 3-4 key aspects that should be compared
 - For each aspect, provide the correct comparison
 - Set minAspects to 2 (must compare at least 2 aspects)
@@ -339,13 +369,23 @@ Return ONLY this JSON:
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Choose terms from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Select a term that is explicitly defined in the materials above.`
+        : '';
+
       return `Generate a one-sentence definition question about "${topic}" for a ${assignmentType}.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Choose an important term/concept from the topic
+- Choose an important term/concept from the topic${context.materialContent ? ' mentioned in the study materials' : ''}
 - Provide a concise one-sentence definition
 - Identify 2-3 key points that must be in the definition
 - This is for quick recall, so keep it simple
@@ -417,13 +457,23 @@ Return this EXACT JSON structure:
       feedback: String
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create problems based on methods/formulas from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Use problem types and methods discussed in the materials above.`
+        : '';
+
       return `Generate a problem type recognition question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Present a problem that could be solved multiple ways (but one is most appropriate)
+- Present a problem that could be solved multiple ways (but one is most appropriate)${context.materialContent ? ' using methods from the study materials' : ''}
 - Identify the correct method/approach
 - Provide 3-4 plausible alternative methods
 - Explain why the correct method is best
@@ -491,13 +541,23 @@ EXAMPLE:
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create comparisons based on concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Compare concepts that are discussed in the materials above.`
+        : '';
+
       return `Generate a concept comparison question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Choose two related concepts to compare
+- Choose two related concepts to compare${context.materialContent ? ' from the study materials' : ''}
 - Specify 2-4 dimensions of comparison (e.g., efficiency, complexity, use cases)
 - Provide correct comparisons for each dimension
 - Set minDimensions to 2
@@ -587,15 +647,16 @@ Return ONLY this JSON:
 /**
  * Generate a Tier 2 exercise using GPT-4
  */
-export async function generateTier2Exercise(templateType, topic, difficulty, assignmentType, openai) {
+export async function generateTier2Exercise(templateType, topic, difficulty, assignmentType, openai, materialContent = null) {
   const template = TIER2_TEMPLATES[templateType];
-  
+
   if (!template) {
     throw new Error(`Unknown Tier 2 template type: ${templateType}`);
   }
-  
-  const prompt = template.generatePrompt(topic, difficulty, assignmentType);
-  
+
+  const context = materialContent ? { materialContent } : {};
+  const prompt = template.generatePrompt(topic, difficulty, assignmentType, context);
+
   const response = await openai.chat.completions.create({
     model: "gpt-5-nano",
     messages: [
@@ -611,9 +672,9 @@ export async function generateTier2Exercise(templateType, topic, difficulty, ass
         temperature: 1,
     // response_format: { type: "json_object" } // Removed - might not be supported by gpt-5-nano
   });
-  
+
   const generated = JSON.parse(response.choices[0].message.content);
-  
+
   return {
     type: templateType,
     topic: topic,
