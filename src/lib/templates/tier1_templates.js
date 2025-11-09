@@ -64,14 +64,14 @@ INSTRUCTIONS:
 - Avoid "all of the above" or "none of the above" options
 - Explanation should be 1-2 sentences
 
-Return this EXACT JSON structure:
+Return this EXACT JSON structure (NOTE: options should be plain text without A/B/C/D labels):
 {
   "question": "your question text here",
   "options": [
-    "Option A text",
-    "Option B text",
-    "Option C text",
-    "Option D text"
+    "First option text",
+    "Second option text",
+    "Third option text",
+    "Fourth option text"
   ],
   "correctAnswer": "B",
   "explanation": "why B is correct"
