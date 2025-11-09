@@ -12,7 +12,8 @@ export const exerciseService = {
     sessionId: string,
     topics: string[],
     exerciseTypes: string[],
-    difficulty: number
+    difficulty: number,
+    onProgress?: (current: number, total: number) => void
   ) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
@@ -27,11 +28,17 @@ export const exerciseService = {
 
     const openai = getOpenAIClient();
     const exercises = [];
+    const total = exerciseTypes.length;
 
     // Generate exercises
     for (let i = 0; i < exerciseTypes.length; i++) {
       const exerciseType = exerciseTypes[i];
       const topic = topics[i % topics.length]; // Rotate through topics
+
+      // Report progress
+      if (onProgress) {
+        onProgress(i + 1, total);
+      }
 
       try {
         const generated = await generateExercise(

@@ -84,7 +84,10 @@ export const sessionService = {
   /**
    * Generate exercises for a specific study session
    */
-  async generateExercisesForSession(sessionId: string) {
+  async generateExercisesForSession(
+    sessionId: string,
+    onProgress?: (current: number, total: number) => void
+  ) {
     const { data: session } = await supabase
       .from('study_sessions')
       .select('*, assignments(*)')
@@ -139,7 +142,8 @@ export const sessionService = {
       sessionId,
       focusTopics,
       exerciseTypes,
-      difficulty
+      difficulty,
+      onProgress
     );
   },
 

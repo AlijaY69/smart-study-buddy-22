@@ -18,6 +18,7 @@ export default function SessionPage() {
   const [exercises, setExercises] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState({ current: 0, total: 0 });
   const [submittingId, setSubmittingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -57,21 +58,26 @@ export default function SessionPage() {
 
   const generateExercises = async () => {
     if (!id) return;
-    
+
     setGenerating(true);
+    setGenerationProgress({ current: 0, total: 0 });
+
     try {
       toast.info("Generating personalized exercises...");
-      
-      const result = await sessionService.generateExercisesForSession(id);
-      
+
+      const result = await sessionService.generateExercisesForSession(id, (current, total) => {
+        setGenerationProgress({ current, total });
+      });
+
       await loadSessionAndExercises();
-      
+
       toast.success(`Exercises generated! ${result?.length || 0} questions ready.`);
     } catch (error: any) {
       console.error("Exercise generation error:", error);
       toast.error(error.message || "Failed to generate exercises. Check console for details.");
     } finally {
       setGenerating(false);
+      setGenerationProgress({ current: 0, total: 0 });
     }
   };
 
@@ -179,15 +185,35 @@ export default function SessionPage() {
         {exercises.length === 0 ? (
           <Card>
             <CardContent className="text-center py-12">
-              <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-semibold mb-2">Ready to Start?</h3>
-              <p className="text-muted-foreground mb-6">
-                Generate personalized exercises tailored to your learning needs
-              </p>
-              <Button onClick={generateExercises} disabled={generating} size="lg">
-                <Sparkles className="h-4 w-4 mr-2" />
-                {generating ? "Generating..." : "Generate Exercises"}
-              </Button>
+              {generating ? (
+                <>
+                  <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+                  <h3 className="text-lg font-semibold mb-2">Generating Exercises...</h3>
+                  {generationProgress.total > 0 && (
+                    <>
+                      <p className="text-muted-foreground mb-4">
+                        Generating question {generationProgress.current} of {generationProgress.total}
+                      </p>
+                      <Progress
+                        value={(generationProgress.current / generationProgress.total) * 100}
+                        className="max-w-xs mx-auto"
+                      />
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                  <h3 className="text-lg font-semibold mb-2">Ready to Start?</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Generate personalized exercises tailored to your learning needs
+                  </p>
+                  <Button onClick={generateExercises} disabled={generating} size="lg">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Generate Exercises
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         ) : (
