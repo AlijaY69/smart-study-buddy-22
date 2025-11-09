@@ -55,8 +55,16 @@ def get_calendar_service_with_write_access():
             try:
                 creds.refresh(Request())
                 print("✅ Token refreshed successfully!")
-                # Save refreshed token
-                save_path = token_path or 'backend/token_write.json'
+                # Save refreshed token - smart path resolution
+                if token_path:
+                    save_path = token_path
+                else:
+                    # Determine if we're in the backend directory or root
+                    if os.path.exists('credentials.json'):
+                        save_path = 'token_write.json'
+                    else:
+                        save_path = 'backend/token_write.json'
+
                 with open(save_path, 'w') as token:
                     token.write(creds.to_json())
                 print(f"💾 Saved refreshed token to: {save_path}")
@@ -80,8 +88,18 @@ def get_calendar_service_with_write_access():
             flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
             creds = flow.run_local_server(port=0)
 
-            # Save the new token
-            save_path = token_path or 'backend/token_write.json'
+            # Save the new token - smart path resolution
+            if token_path:
+                save_path = token_path
+            else:
+                # Determine if we're in the backend directory or root
+                if os.path.exists('token.json') or os.path.exists('credentials.json'):
+                    # We're in backend directory
+                    save_path = 'token_write.json'
+                else:
+                    # We're in root directory
+                    save_path = 'backend/token_write.json'
+
             with open(save_path, 'w') as token:
                 token.write(creds.to_json())
             print(f"✅ New token with write access saved to: {save_path}")
