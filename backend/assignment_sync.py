@@ -523,9 +523,15 @@ def check_and_sync_for_user(user_email):
         # Check for reminders
         reminders = send_proactive_reminders(user_id, days_ahead=7)
 
-        print(f"\n✅ Sync complete! {len(reminders)} reminders generated")
+        print(f"\n✅ Sync complete! {len(created_assignments)} assignments created, {len(reminders)} reminders generated")
 
-        return reminders
+        # Return structured response with both created assignments and reminders
+        return {
+            'created_assignments': created_assignments,
+            'reminders': reminders,
+            'assignments_count': len(created_assignments),
+            'reminders_count': len(reminders)
+        }
 
     except Exception as e:
         print(f"❌ Error during sync: {e}")

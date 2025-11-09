@@ -1,9 +1,9 @@
 # agentic_service.py - Autonomous AI Agent for Proactive Study Support
 """
 This module implements the agentic AI behavior:
-1. Automatically syncs calendar every 5 minutes
-2. Proactively detects upcoming exams (within 7 days)
-3. Sends personalized email reminders to prepare study materials
+1. Automatically syncs calendar every 1 minute
+2. Proactively detects new assignments and creates them in Supabase
+3. Sends personalized email notifications with direct links
 4. Learns from user behavior and adapts recommendations
 """
 
@@ -22,7 +22,7 @@ load_dotenv()
 
 # Configuration
 USER_EMAIL = os.getenv('USER_EMAIL', 'student@example.com')
-SYNC_INTERVAL_MINUTES = 5
+SYNC_INTERVAL_MINUTES = 1  # Sync every 1 minute for faster detection
 CHECK_DAYS_AHEAD = 7  # Check for exams in next 7 days
 
 
