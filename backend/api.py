@@ -18,6 +18,13 @@ import traceback
 import atexit
 import os
 
+# Setup Google Calendar credentials from environment variables (if provided)
+try:
+    from setup_credentials import setup_google_credentials
+    setup_google_credentials()
+except Exception as e:
+    print(f"Warning: Could not setup Google credentials: {e}")
+
 app = Flask(__name__)
 
 # Configure CORS for both local development and production
@@ -26,11 +33,16 @@ allowed_origins = [
     'http://localhost:5173',  # Local development
     'http://0.0.0.0:5173',    # Dockerized frontend served via 0.0.0.0
     'http://localhost:8080',  # Vite preview
-    frontend_url,  # Production frontend URL
-    'https://*.pages.dev'  # Cloudflare Pages preview deployments
+    frontend_url,  # Production frontend URL from environment variable
 ]
 
-CORS(app, origins=allowed_origins, supports_credentials=True)
+# Enable CORS with support for credentials
+CORS(app, 
+     resources={r"/*": {"origins": allowed_origins}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
 # Stop agent gracefully when Flask shuts down
 atexit.register(stop_agent)
