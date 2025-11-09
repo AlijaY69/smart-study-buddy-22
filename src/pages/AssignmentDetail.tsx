@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Calendar, Clock, BookOpen, Upload, CheckCircle2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+
 interface Assignment {
   id: string;
   title: string;
@@ -139,7 +141,7 @@ export default function AssignmentDetail() {
       }
 
       // Call backend API to create study sessions
-      const response = await fetch(`http://localhost:5001/api/assignments/${id}/create-sessions`, {
+      const response = await fetch(`${BACKEND_URL}/api/assignments/${id}/create-sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Brain, Calendar, Mail, Clock, CheckCircle2, XCircle } from 'lucide-react';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+
 interface AgentStatus {
   is_running: boolean;
   last_sync: string | null;
@@ -19,7 +21,7 @@ export function AgentStatus() {
 
   const fetchStatus = async () => {
     try {
-      const response = await fetch('http://localhost:5001/api/agent/status');
+      const response = await fetch(`${BACKEND_URL}/api/agent/status`);
       const data = await response.json();
       
       if (data.success) {

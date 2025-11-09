@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Calendar, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
-const BACKEND_URL = 'http://localhost:5001';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
 export default function CalendarSync() {
   const navigate = useNavigate();
