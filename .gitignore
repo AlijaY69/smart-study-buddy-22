@@ -23,12 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Sensitive files
-token.json
-backend/token.json
-*.token.json
-token_write.json
-backend/token_write.json
 
 # Python
 __pycache__/
