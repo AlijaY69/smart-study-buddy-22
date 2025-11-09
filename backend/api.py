@@ -161,13 +161,25 @@ def sync_to_supabase():
                 'error': 'user_email is required'
             }), 400
         
-        reminders = check_and_sync_for_user(user_email)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Assignments synced successfully',
-            'reminders': reminders
-        })
+        result = check_and_sync_for_user(user_email)
+
+        # Handle both old (list) and new (dict) return format
+        if isinstance(result, dict):
+            return jsonify({
+                'success': True,
+                'message': f"Created {result['assignments_count']} assignments successfully",
+                'created_assignments': result['created_assignments'],
+                'reminders': result['reminders'],
+                'assignments_count': result['assignments_count'],
+                'reminders_count': result['reminders_count']
+            })
+        else:
+            # Old format compatibility (if result is just a list of reminders)
+            return jsonify({
+                'success': True,
+                'message': 'Assignments synced successfully',
+                'reminders': result or []
+            })
         
     except Exception as e:
         print(f"Error in sync_to_supabase: {e}")

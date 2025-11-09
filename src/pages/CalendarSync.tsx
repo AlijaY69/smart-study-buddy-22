@@ -85,9 +85,17 @@ export default function CalendarSync() {
       const data = await response.json();
 
       if (data.success) {
-        toast.success(`Created ${data.reminders?.length || 0} assignments!`);
-        
-        // Show reminders
+        const assignmentsCount = data.assignments_count || data.created_assignments?.length || 0;
+        toast.success(`Created ${assignmentsCount} assignment${assignmentsCount !== 1 ? 's' : ''} successfully!`);
+
+        // Show created assignments
+        if (data.created_assignments && data.created_assignments.length > 0) {
+          data.created_assignments.forEach((assignment: any) => {
+            toast.success(`✅ Created: ${assignment.title}`, { duration: 5000 });
+          });
+        }
+
+        // Show reminders if any
         if (data.reminders && data.reminders.length > 0) {
           data.reminders.forEach((reminder: any) => {
             toast.info(reminder.message, { duration: 8000 });
@@ -96,7 +104,7 @@ export default function CalendarSync() {
 
         // Refresh to clear unprocessed
         await fetchUnprocessed();
-        
+
         // Navigate back to dashboard
         setTimeout(() => navigate('/'), 2000);
       }
