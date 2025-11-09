@@ -46,6 +46,12 @@ export function ShortAnswerExercise({ exercise, onSubmit, isSubmitting }: ShortA
           )}
         </div>
         <CardTitle className="text-lg mt-4">{payload.question || payload.problem}</CardTitle>
+        {payload.scenario && (
+          <CardDescription className="mt-3 p-3 bg-muted rounded-md">
+            <strong>Scenario:</strong>
+            <p className="mt-1 whitespace-pre-wrap">{payload.scenario}</p>
+          </CardDescription>
+        )}
         {payload.instructions && (
           <CardDescription className="mt-2">{payload.instructions}</CardDescription>
         )}

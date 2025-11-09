@@ -95,7 +95,7 @@ def extract_topics_from_title(title):
     Returns a single-element array with the cleaned title as one topic.
     """
     # Remove common words but keep the rest as a single topic
-    common_words = ['exam', 'test', 'quiz', 'final', 'midterm', 'assignment', 'the', 'a', 'an', 'for']
+    common_words = ['exam', 'test', 'quiz', 'final', 'midterm', 'assignment', 'the', 'a', 'an', 'for', 'on', 'in', 'at', 'to']
     words = title.split()
     filtered_words = [word for word in words if word.lower() not in common_words]
 

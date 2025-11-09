@@ -110,7 +110,9 @@ export function MiniProblemSetExercise({ exercise, onSubmit, isSubmitting }: Min
                 <div className="space-y-2 bg-background p-3 rounded-md text-sm">
                   <p>
                     <strong>Your Answer:</strong>{' '}
-                    {exercise.user_answer?.answer?.[index] || 'No answer'}
+                    {Array.isArray(exercise.user_answer?.answer)
+                      ? (exercise.user_answer.answer[index] || 'No answer')
+                      : 'No answer'}
                   </p>
                   <p>
                     <strong>Correct Answer:</strong>{' '}
