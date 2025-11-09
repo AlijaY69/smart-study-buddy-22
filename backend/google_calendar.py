@@ -30,31 +30,25 @@ def get_calendar_service_with_write_access():
     for path in token_paths:
         if os.path.exists(path):
             token_path = path
-            print(f"✅ Found token at: {path}")
             break
 
     for path in credentials_paths:
         if os.path.exists(path):
             credentials_path = path
-            print(f"✅ Found credentials at: {path}")
             break
 
     # Try to load existing token
     if token_path and os.path.exists(token_path):
         try:
             creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-            print("📝 Loaded existing token with write access")
         except Exception as e:
-            print(f"⚠️ Could not load token: {e}")
             creds = None
 
     # Check if we need to refresh or re-authenticate
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            print("🔄 Token expired, attempting to refresh...")
             try:
                 creds.refresh(Request())
-                print("✅ Token refreshed successfully!")
                 # Save refreshed token - smart path resolution
                 if token_path:
                     save_path = token_path
@@ -67,23 +61,18 @@ def get_calendar_service_with_write_access():
 
                 with open(save_path, 'w') as token:
                     token.write(creds.to_json())
-                print(f"💾 Saved refreshed token to: {save_path}")
             except Exception as e:
-                print(f"❌ Token refresh failed: {e}")
-                print("🔐 Will re-authenticate with credentials.json...")
                 creds = None
 
         # If still no valid credentials, re-authenticate
         if not creds or not creds.valid:
             if not credentials_path:
                 raise Exception(
-                    "❌ credentials.json not found! "
+                    " credentials.json not found! "
                     "Need it to generate a new token with write permissions. "
                     "Place credentials.json in the backend/ folder."
                 )
 
-            print("🔐 Authenticating with Google (requesting WRITE access)...")
-            print("⚠️ A browser window will open. Please authorize the app.")
 
             flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
             creds = flow.run_local_server(port=0)
@@ -102,10 +91,9 @@ def get_calendar_service_with_write_access():
 
             with open(save_path, 'w') as token:
                 token.write(creds.to_json())
-            print(f"✅ New token with write access saved to: {save_path}")
 
     if not creds or not creds.valid:
-        raise Exception("❌ Could not get valid credentials")
+        raise Exception(" Could not get valid credentials")
 
     service = build('calendar', 'v3', credentials=creds)
     return service
@@ -158,7 +146,6 @@ def get_existing_events_for_day(service, date):
         return parsed_events
 
     except Exception as e:
-        print(f"⚠️ Error fetching calendar events: {e}")
         return []
 
 def find_best_available_time(service, preferred_date, preferred_hour, duration_min=60, min_hour=7, max_hour=23):
@@ -207,20 +194,17 @@ def find_best_available_time(service, preferred_date, preferred_hour, duration_m
                 # Check if times overlap
                 if (candidate_start < event['end'] and candidate_end > event['start']):
                     has_conflict = True
-                    print(f"   ⚠️ Conflict at {hour}:00 with: {event['summary']}")
                     break
 
             if not has_conflict:
                 if hour != preferred_hour:
-                    print(f"   ✅ Found available slot at {hour}:00 (preferred was {preferred_hour}:00)")
+                    pass
                 return candidate_start
 
         # If no slot found, return preferred time anyway (user can manually adjust)
-        print(f"   ⚠️ No conflict-free slot found, using preferred time {preferred_hour}:00")
         return preferred_date.replace(hour=preferred_hour, minute=0, second=0, microsecond=0)
 
     except Exception as e:
-        print(f"⚠️ Error finding available time: {e}")
         # Fallback to preferred time
         return preferred_date.replace(hour=preferred_hour, minute=0, second=0, microsecond=0)
 
@@ -267,19 +251,19 @@ def create_calendar_event_for_session(session, assignment_title, frontend_url="h
         session_url = f"{frontend_url}/sessions/{session_id}" if session_id else f"{frontend_url}/assignments"
 
         # Create event description
-        description = f"""📚 Study Session for {assignment_title}
+        description = f""" Study Session for {assignment_title}
 
 Focus: {focus}
 Topics: {topics_str}
 
-🔗 Start your session: {session_url}
+ Start your session: {session_url}
 
 This study session was automatically scheduled by your AI Study Companion.
 """
 
         # Create the calendar event
         event = {
-            'summary': f'📚 Study: {assignment_title}',
+            'summary': f' Study: {assignment_title}',
             'description': description,
             'start': {
                 'dateTime': start_time.isoformat(),
@@ -302,14 +286,10 @@ This study session was automatically scheduled by your AI Study Companion.
         # Insert the event into the calendar
         created_event = service.events().insert(calendarId='primary', body=event).execute()
 
-        print(f"✅ Created calendar event: {assignment_title}")
-        print(f"   📅 Time: {start_time.strftime('%Y-%m-%d %H:%M')}")
-        print(f"   🔗 Link: {created_event.get('htmlLink', 'N/A')}")
 
         return created_event
 
     except Exception as e:
-        print(f"❌ Failed to create calendar event: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -327,10 +307,8 @@ def create_calendar_events_for_sessions(sessions, assignment_title, frontend_url
         int: Number of events successfully created
     """
     if not sessions:
-        print("⚠️ No sessions provided to create calendar events")
         return 0
 
-    print(f"\n📅 Creating {len(sessions)} calendar event(s) for: {assignment_title}")
 
     created_count = 0
     for session in sessions:
@@ -338,17 +316,13 @@ def create_calendar_events_for_sessions(sessions, assignment_title, frontend_url
         if event:
             created_count += 1
 
-    print(f"✅ Created {created_count}/{len(sessions)} calendar events")
     return created_count
 
 if __name__ == '__main__':
-    print("🚀 Google Calendar Event Creator")
-    print("=" * 60)
+    pass
 
     # Test authentication
     try:
         service = get_calendar_service_with_write_access()
-        print("\n✅ Successfully authenticated with Google Calendar!")
-        print("   You can now create calendar events for study sessions.")
     except Exception as e:
-        print(f"\n❌ Authentication failed: {e}")
+        pass

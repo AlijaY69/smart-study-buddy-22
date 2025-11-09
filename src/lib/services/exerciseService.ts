@@ -14,8 +14,6 @@ export const exerciseService = {
     exerciseTypes: string[],
     difficulty: number
   ) {
-    console.log('generateForSession called with:', { assignmentId, sessionId, topics, exerciseTypes, difficulty });
-    
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Not authenticated');
 
@@ -26,19 +24,15 @@ export const exerciseService = {
       .single();
 
     if (!assignment) throw new Error('Assignment not found');
-    console.log('Assignment found:', assignment.title);
 
     const openai = getOpenAIClient();
     const exercises = [];
 
     // Generate exercises
-    console.log(`Generating ${exerciseTypes.length} exercises...`);
     for (let i = 0; i < exerciseTypes.length; i++) {
       const exerciseType = exerciseTypes[i];
       const topic = topics[i % topics.length]; // Rotate through topics
 
-      console.log(`[${i+1}/${exerciseTypes.length}] Generating ${exerciseType} for ${topic}...`);
-      
       try {
         const generated = await generateExercise(
           exerciseType,
@@ -48,8 +42,6 @@ export const exerciseService = {
           openai,
           assignment.material_content || null
         );
-
-        console.log(`Generated ${exerciseType}:`, generated);
 
         // Store in database
         const { data: exercise, error } = await supabase
@@ -71,7 +63,6 @@ export const exerciseService = {
           continue;
         }
 
-        console.log(`Exercise saved to database:`, exercise.id);
         exercises.push(exercise);
       } catch (error) {
         console.error(`Failed to generate ${exerciseType}:`, error);
@@ -79,7 +70,6 @@ export const exerciseService = {
       }
     }
 
-    console.log(`Total exercises generated: ${exercises.length}`);
     return exercises;
   },
 

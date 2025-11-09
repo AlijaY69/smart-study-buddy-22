@@ -67,7 +67,6 @@ def create_assignment_in_supabase(user_id, assignment_data, create_sessions=Fals
             result = response.json()
             if result and len(result) > 0:
                 created_assignment = result[0]
-                print(f"✅ Created assignment in Supabase: {assignment_data['title']}")
 
                 # Only create study sessions if explicitly requested (e.g., after materials uploaded)
                 if create_sessions:
@@ -77,14 +76,11 @@ def create_assignment_in_supabase(user_id, assignment_data, create_sessions=Fals
 
                 return created_assignment
             else:
-                print(f"⚠️ Assignment created but no data returned")
                 return {'id': 'unknown', **assignment}
         else:
-            print(f"❌ Failed to create assignment: {response.status_code} - {response.text}")
             return None
 
     except Exception as e:
-        print(f"❌ Error creating assignment in Supabase: {e}")
         import traceback
         traceback.print_exc()
         return None
@@ -131,14 +127,11 @@ def get_user_preferred_hour(user_id):
                 preferred_time = preferred_times[0] if preferred_times else 'evening'
                 preferred_hour = time_map.get(preferred_time, 18)
 
-                print(f"📅 User prefers {preferred_time} study sessions (hour: {preferred_hour})")
                 return preferred_hour
 
-        print(f"📅 No preference found, defaulting to 6 PM")
         return 18  # Default to 6 PM
 
     except Exception as e:
-        print(f"⚠️ Error getting user preferences: {e}, defaulting to 6 PM")
         return 18  # Default to 6 PM on error
 
 def create_study_sessions_for_assignment(client, user_id, assignment_id, assignment_data):
@@ -150,7 +143,6 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
         today = datetime.now(local_tz)
         days_until_due = max(1, (due_date - today).days)
 
-        print(f"📅 Assignment due in {days_until_due} day(s)")
 
         # Determine number of sessions based on assignment type
         assignment_type = assignment_data.get('type', 'exam')
@@ -161,8 +153,6 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
         else:
             sessions_needed = min(max(days_until_due - 1, 1), 3)  # At least 1, max 3
 
-        print(f"📚 Creating {sessions_needed} study session(s)...")
-        print(f"⏰ Using timezone: {DEFAULT_TIMEZONE}")
 
         sessions = []
         session_duration = 60  # Default 60 minutes
@@ -175,11 +165,8 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
         try:
             from google_calendar import get_calendar_service_with_write_access, find_best_available_time
             calendar_service = get_calendar_service_with_write_access()
-            print(f"📅 Calendar conflict detection enabled")
         except Exception as cal_error:
-            print(f"⚠️ Calendar conflict detection unavailable: {str(cal_error)[:200]}")
-            print(f"   To enable conflict detection, run: python backend/google_calendar.py")
-            print(f"   Sessions will be scheduled at preferred time without conflict checking")
+            calendar_service = None
 
         # Create study sessions
         for i in range(sessions_needed):
@@ -195,7 +182,6 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
 
             # Find conflict-free time if calendar service is available
             if calendar_service:
-                print(f"\n  Session {i+1}: Checking for conflicts on {base_date.strftime('%Y-%m-%d')}...")
                 session_date = find_best_available_time(
                     calendar_service,
                     base_date,
@@ -223,7 +209,6 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
                 'status': 'scheduled'
             }
             sessions.append(session)
-            print(f"  Session {i+1}: {session_date.strftime('%Y-%m-%d %H:%M %Z')} ({DEFAULT_TIMEZONE}) - {focus}")
 
         # Insert sessions using REST API
         url = f"{client['url']}/rest/v1/study_sessions"
@@ -231,7 +216,6 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
 
         if response.status_code in [200, 201]:
             created_sessions = response.json()
-            print(f"✅ Created {len(created_sessions)} study sessions for assignment")
 
             # Create Google Calendar events for the sessions
             try:
@@ -242,19 +226,15 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
                     assignment_title,
                     frontend_url="http://localhost:8080"
                 )
-                print(f"📅 Created {calendar_events_created} Google Calendar events")
             except Exception as calendar_error:
-                print(f"⚠️ Failed to create calendar events (sessions still created): {calendar_error}")
                 # Don't fail the whole process if calendar creation fails
+                pass
 
             return len(created_sessions)
         else:
-            print(f"❌ Failed to create study sessions: {response.status_code}")
-            print(f"   Response: {response.text}")
             return 0
 
     except Exception as e:
-        print(f"❌ Error creating study sessions: {e}")
         import traceback
         traceback.print_exc()
         return 0
@@ -275,7 +255,6 @@ def sync_calendar_to_assignments(user_id, send_notification_callback=None):
     unprocessed = get_unprocessed_assignments()
     created_assignments = []
 
-    print(f"\n🔄 Syncing {len(unprocessed)} unprocessed assignments...")
 
     for calendar_event in unprocessed:
         assignment_info = extract_assignment_info(
@@ -293,11 +272,7 @@ def sync_calendar_to_assignments(user_id, send_notification_callback=None):
             mark_assignment_processed(calendar_event['_id'])
 
             # Return the created assignment info for notification
-            print(f"✅ Assignment created: {assignment_info['title']}")
-            print(f"   ⚠️ Study sessions NOT created yet - waiting for user to upload materials")
 
-    print(f"\n✅ Synced {len(created_assignments)} assignments to Supabase")
-    print(f"   📧 Email notifications will be sent to prompt material upload")
     return created_assignments
 
 def mark_assignment_notification_sent(assignment_id):
@@ -319,14 +294,11 @@ def mark_assignment_notification_sent(assignment_id):
         response = requests.patch(url, json=update_data, headers=client['headers'])
 
         if response.status_code in [200, 204]:
-            print(f"✅ Marked notification sent for assignment {assignment_id}")
             return True
         else:
-            print(f"⚠️ Failed to mark notification: {response.status_code}")
             return False
 
     except Exception as e:
-        print(f"❌ Error marking notification sent: {e}")
         return False
 
 
@@ -348,12 +320,10 @@ def create_sessions_for_assignment(assignment_id, user_id):
         response = requests.get(url, headers=client['headers'])
 
         if response.status_code != 200:
-            print(f"❌ Failed to get assignment: {response.status_code}")
             return 0
 
         assignments = response.json()
         if not assignments or len(assignments) == 0:
-            print(f"❌ Assignment not found: {assignment_id}")
             return 0
 
         assignment = assignments[0]
@@ -380,11 +350,9 @@ def create_sessions_for_assignment(assignment_id, user_id):
         }
         requests.patch(update_url, json=update_data, headers=client['headers'])
 
-        print(f"✅ Created {sessions_created} study sessions for assignment")
         return sessions_created
 
     except Exception as e:
-        print(f"❌ Error creating sessions for assignment: {e}")
         import traceback
         traceback.print_exc()
         return 0
@@ -403,7 +371,6 @@ def send_proactive_reminders(user_id, days_ahead=7):
     upcoming = get_upcoming_assignments(days_ahead)
     reminders = []
     
-    print(f"\n📧 Checking for assignments in next {days_ahead} days...")
     
     for assignment in upcoming:
         # Calculate days until assignment
@@ -424,7 +391,6 @@ def send_proactive_reminders(user_id, days_ahead=7):
         # Mark reminder as sent
         mark_reminder_sent(assignment['_id'])
         
-        print(f"📧 Reminder: {reminder['message']}")
     
     return reminders
 
@@ -434,13 +400,13 @@ def generate_reminder_message(assignment, days_until):
     
     if days_until <= 1:
         urgency = "tomorrow"
-        emoji = "🚨"
+        emoji = ""
     elif days_until <= 3:
         urgency = f"in {days_until} days"
-        emoji = "⚠️"
+        emoji = ""
     else:
         urgency = f"in {days_until} days"
-        emoji = "📚"
+        emoji = ""
     
     # Extract course name
     info = extract_assignment_info(title, assignment['datetime'])
@@ -469,33 +435,21 @@ def check_and_sync_for_user(user_email):
         response = requests.get(url, headers=client['headers'])
 
         if response.status_code != 200:
-            print(f"❌ Error fetching user: {response.status_code} - {response.text}")
-            print(f"   💡 Make sure you're logged into the app first!")
             return
 
         result = response.json()
         if not result or len(result) == 0:
-            print(f"❌ User not found: {user_email}")
-            print(f"   📝 This email doesn't have a profile in Supabase yet.")
-            print(f"   👉 To fix this:")
-            print(f"      1. Go to: http://localhost:8080/auth")
-            print(f"      2. Sign up or log in with: {user_email}")
-            print(f"      3. Your profile will be created automatically")
-            print(f"      4. Assignments will sync on next agent check!")
             return
 
         user = result[0]
         user_id = user['id']
 
-        print(f"\n👤 Syncing for user: {user_email}")
-        print(f"   User ID: {user_id}")
 
         # Sync unprocessed assignments and get created assignments
         created_assignments = sync_calendar_to_assignments(user_id)
 
         # Send email notification for each newly created assignment
         if created_assignments:
-            print(f"\n📧 Sending email notifications for {len(created_assignments)} new assignments...")
             from email_service import send_new_assignment_notification
 
             for assignment in created_assignments:
@@ -513,17 +467,14 @@ def check_and_sync_for_user(user_email):
 
                     if email_sent:
                         mark_assignment_notification_sent(assignment['id'])
-                        print(f"✅ Email sent for: {assignment['title']}")
                     else:
-                        print(f"⚠️  Failed to send email for: {assignment['title']}")
+                        pass
                 except Exception as e:
-                    print(f"❌ Error sending email for {assignment.get('title', 'Unknown')}: {e}")
                     continue
 
         # Check for reminders
         reminders = send_proactive_reminders(user_id, days_ahead=7)
 
-        print(f"\n✅ Sync complete! {len(created_assignments)} assignments created, {len(reminders)} reminders generated")
 
         # Return structured response with both created assignments and reminders
         return {
@@ -534,13 +485,11 @@ def check_and_sync_for_user(user_email):
         }
 
     except Exception as e:
-        print(f"❌ Error during sync: {e}")
         import traceback
         traceback.print_exc()
 
 if __name__ == '__main__':
-    print("🚀 Assignment Sync Service")
-    print("=" * 60)
+    pass
     
     # Example: sync for first user in database
     # In production, this would run for all users
@@ -548,6 +497,5 @@ if __name__ == '__main__':
         user_email = sys.argv[1]
         check_and_sync_for_user(user_email)
     else:
-        print("Usage: python assignment_sync.py <user_email>")
-        print("\nOr run without args to sync for all users (not implemented yet)")
+        pass
 

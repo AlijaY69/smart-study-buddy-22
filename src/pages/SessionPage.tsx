@@ -61,13 +61,10 @@ export default function SessionPage() {
     setGenerating(true);
     try {
       toast.info("Generating personalized exercises...");
-      console.log("Starting exercise generation for session:", id);
       
       const result = await sessionService.generateExercisesForSession(id);
-      console.log("Generation result:", result);
       
       await loadSessionAndExercises();
-      console.log("Exercises loaded, count:", exercises.length);
       
       toast.success(`Exercises generated! ${result?.length || 0} questions ready.`);
     } catch (error: any) {
