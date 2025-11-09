@@ -35,13 +35,23 @@ export const TIER3_TEMPLATES = {
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create scenarios based on SPECIFIC concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Use concepts and principles that are explained in the materials above.`
+        : '';
+
       return `Generate a scenario-based application question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Create a realistic scenario (2-4 sentences) where the student must apply concepts
+- Create a realistic scenario (2-4 sentences) where the student must apply concepts${context.materialContent ? ' from the study materials' : ''}
 - Ask a specific question about what concept applies, what they should do, or what would happen
 - Identify the relevant concepts from the topic
 - Provide the correct analysis/answer
@@ -143,13 +153,23 @@ Return ONLY this JSON:
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create prediction scenarios based on concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Base scenarios on principles and mechanisms explained in the materials above.`
+        : '';
+
       return `Generate a prediction scenario question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Describe a situation with specific conditions
+- Describe a situation with specific conditions${context.materialContent ? ' using concepts from the study materials' : ''}
 - Ask "What would happen if..." or "What is the likely outcome..."
 - Provide the correct prediction
 - Explain the reasoning behind this prediction
@@ -254,13 +274,23 @@ Return ONLY this JSON:
       score: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create error identification questions based on problems from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Use problem types and common mistakes relevant to the materials above.`
+        : '';
+
       return `Generate an error identification question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Present a problem and an INCORRECT solution
+- Present a problem and an INCORRECT solution${context.materialContent ? ' based on the study materials' : ''}
 - The solution should contain 1-2 common mistakes students make
 - Identify each error with its type, location, and explanation
 - Provide the correct solution
@@ -378,13 +408,23 @@ Return ONLY this JSON:
       isCorrect: Boolean
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create problem sets based on concepts and examples from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Use problem types and concepts discussed in the materials above.`
+        : '';
+
       return `Generate a mini problem set about "${topic}" for a ${assignmentType}.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Create 3-5 related problems that build on each other or test the same concept
+- Create 3-5 related problems that build on each other or test the same concept${context.materialContent ? ' from the study materials' : ''}
 - Mix problem types: numerical calculations, short conceptual questions, or quick MCQs
 - For multiple_choice type, include an options array with 4 choices (A, B, C, D)
 - Each problem should be solvable in 1-2 minutes
@@ -551,15 +591,16 @@ Return ONLY this JSON:
 /**
  * Generate a Tier 3 exercise using GPT-4
  */
-export async function generateTier3Exercise(templateType, topic, difficulty, assignmentType, openai) {
+export async function generateTier3Exercise(templateType, topic, difficulty, assignmentType, openai, materialContent = null) {
   const template = TIER3_TEMPLATES[templateType];
-  
+
   if (!template) {
     throw new Error(`Unknown Tier 3 template type: ${templateType}`);
   }
-  
-  const prompt = template.generatePrompt(topic, difficulty, assignmentType);
-  
+
+  const context = materialContent ? { materialContent } : {};
+  const prompt = template.generatePrompt(topic, difficulty, assignmentType, context);
+
   const response = await openai.chat.completions.create({
     model: "gpt-5-nano",
     messages: [
@@ -575,9 +616,9 @@ export async function generateTier3Exercise(templateType, topic, difficulty, ass
         temperature: 1,
     // response_format: { type: "json_object" } // Removed - might not be supported by gpt-5-nano
   });
-  
+
   const generated = JSON.parse(response.choices[0].message.content);
-  
+
   return {
     type: templateType,
     topic: topic,

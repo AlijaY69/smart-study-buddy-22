@@ -100,12 +100,13 @@ export default function AssignmentDetail() {
 
     setUploading(true);
     try {
-      // Update assignment to mark materials as uploaded
+      // Update assignment to mark materials as uploaded and store the content
       const { error } = await supabase
         .from("assignments")
         .update({
           materials_uploaded: true,
           materials_uploaded_at: new Date().toISOString(),
+          material_content: materials.trim(),
         })
         .eq("id", id);
 

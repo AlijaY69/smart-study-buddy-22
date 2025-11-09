@@ -45,7 +45,8 @@ export const exerciseService = {
           topic,
           difficulty,
           assignment.type,
-          openai
+          openai,
+          assignment.material_content || null
         );
 
         console.log(`Generated ${exerciseType}:`, generated);

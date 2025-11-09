@@ -244,14 +244,14 @@ export function calculateDifficulty(userProgress, topic, sessionIndex, totalSess
 /**
  * Generate any exercise from any tier
  */
-export async function generateExercise(templateType, topic, difficulty, assignmentType, openai) {
+export async function generateExercise(templateType, topic, difficulty, assignmentType, openai, materialContent = null) {
   // Determine which tier this template belongs to
   if (TIER1_TEMPLATES[templateType]) {
-    return await generateT1(templateType, topic, difficulty, assignmentType, openai);
+    return await generateT1(templateType, topic, difficulty, assignmentType, openai, materialContent);
   } else if (TIER2_TEMPLATES[templateType]) {
-    return await generateT2(templateType, topic, difficulty, assignmentType, openai);
+    return await generateT2(templateType, topic, difficulty, assignmentType, openai, materialContent);
   } else if (TIER3_TEMPLATES[templateType]) {
-    return await generateT3(templateType, topic, difficulty, assignmentType, openai);
+    return await generateT3(templateType, topic, difficulty, assignmentType, openai, materialContent);
   } else {
     throw new Error(`Unknown template type: ${templateType}`);
   }

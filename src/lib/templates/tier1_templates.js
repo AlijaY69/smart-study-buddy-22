@@ -38,17 +38,27 @@ export const TIER1_TEMPLATES = {
       const difficultyDescriptions = {
         1: "very basic recall or recognition",
         2: "straightforward understanding",
-        3: "moderate application or analysis", 
+        3: "moderate application or analysis",
         4: "complex reasoning or synthesis",
         5: "expert-level critical thinking"
       };
-      
+
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+The student has uploaded the following study materials. Base your question on SPECIFIC concepts, facts, or details from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Your question should test knowledge that can be directly derived from the materials above. Use specific terminology, examples, or concepts mentioned in the materials.`
+        : '';
+
       return `Generate a multiple choice question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5 - ${difficultyDescriptions[difficulty]}
+${materialContext}
 
 INSTRUCTIONS:
-- Create a clear, unambiguous question
+- Create a clear, unambiguous question${context.materialContent ? ' based on the study materials provided above' : ''}
 - Provide exactly 4 options labeled A, B, C, D
 - Make distractors plausible but clearly incorrect to someone who understands the concept
 - Avoid "all of the above" or "none of the above" options
@@ -108,13 +118,23 @@ Return this EXACT JSON structure:
       feedback: String
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Base your statement on SPECIFIC concepts, facts, or details from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Your statement should test knowledge that can be directly derived from the materials above.`
+        : '';
+
       return `Generate a true/false question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Create a statement that is definitively true or false (not ambiguous)
+- Create a statement that is definitively true or false (not ambiguous)${context.materialContent ? ' based on the study materials' : ''}
 - If false, the statement should contain a common misconception
 - Explanation should clarify why it's true/false in 2-3 sentences
 - Provide 2-4 keywords that a good justification should include
@@ -184,13 +204,23 @@ Return this EXACT JSON structure:
       timesReviewed: Number
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create flashcards based on SPECIFIC concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Focus on key terms, definitions, and concepts from the materials above.`
+        : '';
+
       return `Generate a flashcard for studying "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Front: A clear question or prompt (not just a term)
+- Front: A clear question or prompt (not just a term)${context.materialContent ? ' based on the study materials' : ''}
 - Back: Concise answer/explanation (2-4 sentences max)
 - Include 2-3 key points that the answer must cover
 
@@ -264,13 +294,23 @@ Return this EXACT JSON structure:
       feedback: String
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create questions based on SPECIFIC facts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Use actual sentences, terminology, or concepts from the materials above.`
+        : '';
+
       return `Generate a fill-in-the-blank question about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Create a sentence with 1-2 blank spaces marked with ___
+- Create a sentence with 1-2 blank spaces marked with ___${context.materialContent ? ' using content from the study materials' : ''}
 - Provide all acceptable answers for each blank (including common valid variations)
 - Blanks should test key terminology or concepts
 - Sentence should provide enough context to make the answer clear
@@ -343,13 +383,23 @@ Return this EXACT JSON structure:
       feedback: String
     },
     
-    generatePrompt: (topic, difficulty, assignmentType) => {
+    generatePrompt: (topic, difficulty, assignmentType, context = {}) => {
+      const materialContext = context.materialContent
+        ? `\n\nSTUDY MATERIALS PROVIDED:
+Create problems based on SPECIFIC formulas, equations, or concepts from these materials:
+
+${context.materialContent}
+
+IMPORTANT: Use actual formulas, values, or problem types from the materials above.`
+        : '';
+
       return `Generate a numerical problem about "${topic}" for a ${assignmentType} exam.
 
 DIFFICULTY: ${difficulty}/5
+${materialContext}
 
 INSTRUCTIONS:
-- Create a clear problem that requires calculation
+- Create a clear problem that requires calculation${context.materialContent ? ' based on formulas/concepts from the study materials' : ''}
 - Provide the exact numeric answer
 - Specify units if applicable (or null if unitless)
 - Provide solution steps if it's a multi-step problem
@@ -416,15 +466,16 @@ Return this EXACT JSON structure:
 /**
  * Generate an exercise using GPT-4
  */
-export async function generateExercise(templateType, topic, difficulty, assignmentType, openai) {
+export async function generateExercise(templateType, topic, difficulty, assignmentType, openai, materialContent = null) {
   const template = TIER1_TEMPLATES[templateType];
-  
+
   if (!template) {
     throw new Error(`Unknown template type: ${templateType}`);
   }
-  
-  const prompt = template.generatePrompt(topic, difficulty, assignmentType);
-  
+
+  const context = materialContent ? { materialContent } : {};
+  const prompt = template.generatePrompt(topic, difficulty, assignmentType, context);
+
   const response = await openai.chat.completions.create({
     model: "gpt-5-nano",
     messages: [
@@ -440,9 +491,9 @@ export async function generateExercise(templateType, topic, difficulty, assignme
     temperature: 1
     // Removed response_format - might not be supported by gpt-5-nano
   });
-  
+
   const generated = JSON.parse(response.choices[0].message.content);
-  
+
   // Add metadata
   return {
     type: templateType,
