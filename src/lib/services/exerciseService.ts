@@ -204,7 +204,7 @@ export const exerciseService = {
     }, 0);
     const overallReadiness = Math.round((totalMastery / allTopics.length) * 100);
 
-    // Upsert progress
+    // Upsert progress - specify the unique constraint columns
     const { error } = await supabase
       .from('user_progress')
       .upsert({
@@ -215,6 +215,8 @@ export const exerciseService = {
         weak_topics: weakTopics,
         strong_topics: strongTopics,
         updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,assignment_id'
       });
 
     if (error) console.error('Failed to update progress:', error);

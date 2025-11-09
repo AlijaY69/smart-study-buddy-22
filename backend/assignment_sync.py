@@ -91,19 +91,21 @@ def create_assignment_in_supabase(user_id, assignment_data, create_sessions=Fals
 
 def extract_topics_from_title(title):
     """
-    Try to extract topics from assignment title.
-    This is a simple heuristic - can be improved.
+    Extract topics from assignment title by removing common words but keeping phrases together.
+    Returns a single-element array with the cleaned title as one topic.
     """
-    # Remove common words
-    common_words = ['exam', 'test', 'quiz', 'final', 'midterm', 'assignment', 'the', 'a', 'an']
+    # Remove common words but keep the rest as a single topic
+    common_words = ['exam', 'test', 'quiz', 'final', 'midterm', 'assignment', 'the', 'a', 'an', 'for']
     words = title.split()
-    topics = [word for word in words if word.lower() not in common_words and len(word) > 2]
-    
-    # Return first 3 words as topics, or generic topic
-    if len(topics) > 0:
-        return topics[:3]
+    filtered_words = [word for word in words if word.lower() not in common_words]
+
+    # Join the filtered words back into a single topic
+    if len(filtered_words) > 0:
+        topic = ' '.join(filtered_words)
+        return [topic]
     else:
-        return [title.split()[0] if title.split() else 'General']
+        # Fallback to using the original title
+        return [title]
 
 def get_user_preferred_hour(user_id):
     """Get user's preferred study hour based on their preferences."""

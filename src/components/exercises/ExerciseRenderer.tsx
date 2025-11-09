@@ -2,6 +2,7 @@ import { MultipleChoiceExercise } from './MultipleChoiceExercise';
 import { NumericalExercise } from './NumericalExercise';
 import { ShortAnswerExercise } from './ShortAnswerExercise';
 import { TrueFalseExercise } from './TrueFalseExercise';
+import { MiniProblemSetExercise } from './MiniProblemSetExercise';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 
@@ -78,14 +79,11 @@ export function ExerciseRenderer({ exercise, onSubmit, isSubmitting }: ExerciseR
 
     case 'mini_problem_set':
       return (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-amber-600">
-              <AlertCircle className="h-5 w-5" />
-              <p>Mini problem set component coming soon!</p>
-            </div>
-          </CardContent>
-        </Card>
+        <MiniProblemSetExercise
+          exercise={exercise}
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+        />
       );
 
     default:
