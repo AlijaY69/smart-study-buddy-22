@@ -7,6 +7,15 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
+FRONTEND_URL = os.getenv('FRONTEND_URL') or os.getenv('PUBLIC_FRONTEND_URL') or 'http://localhost:5173'
+
+def build_frontend_url(path: str) -> str:
+    """Return an absolute frontend URL for the given path."""
+    base = FRONTEND_URL.rstrip('/')
+    cleaned_path = (path or '').strip()
+    if cleaned_path and not cleaned_path.startswith('/'):
+        cleaned_path = f'/{cleaned_path}'
+    return f'{base}{cleaned_path}'
 
 def send_new_assignment_notification(user_email, assignment_details):
     """
@@ -41,7 +50,8 @@ def send_new_assignment_notification(user_email, assignment_details):
 
     # Get assignment ID for direct link
     assignment_id = assignment_details.get('id', '')
-    assignment_url = f"http://localhost:8080/assignments/{assignment_id}" if assignment_id else "http://localhost:8080/assignments"
+    assignment_path = f"/assignments/{assignment_id}" if assignment_id else "/assignments"
+    assignment_url = build_frontend_url(assignment_path)
 
     # Email body (plain text)
     text_body = f"""

@@ -2,6 +2,10 @@
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 import re
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Singleton MongoDB client to reuse connections
 _mongo_client = None
@@ -22,8 +26,11 @@ def get_database():
             _mongo_client = None
             _mongo_db = None
     
-    # Create new connection
-    CONNECTION_STRING = "mongodb+srv://prosus-db-user:yLFIMGwT48qUKxDG@prosus-db-user.wfei3mu.mongodb.net/?retryWrites=true&w=majority"
+    # Get connection string from environment variable or use default
+    CONNECTION_STRING = os.getenv(
+        'MONGODB_CONNECTION_STRING',
+        "mongodb+srv://prosus-db-user:yLFIMGwT48qUKxDG@prosus-db-user.wfei3mu.mongodb.net/?retryWrites=true&w=majority"
+    )
     
     try:
         _mongo_client = MongoClient(

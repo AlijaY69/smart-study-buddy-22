@@ -1,0 +1,43 @@
+# Exported from Render on 2025-11-09T13:46:44Z
+version: "1"
+projects:
+- name: My project
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: studyBuddy
+      runtime: python
+      repo: https://github.com/AlijaY69/smart-study-buddy-22
+      plan: free
+      envVars:
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_OPENAI_API_KEY
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_SUPABASE_PROJECT_ID
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: MONGODB_CONNECTION_STRING
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SERVER
+        sync: false
+      - key: SENDER_PASSWORD
+        sync: false
+      - key: SENDER_EMAIL
+        sync: false
+      - key: USER_EMAIL
+        sync: false
+      region: frankfurt
+      buildCommand: docker compose up -b
+      startCommand: docker compose up -b
+      autoDeployTrigger: commit
