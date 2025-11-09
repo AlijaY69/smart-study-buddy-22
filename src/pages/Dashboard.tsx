@@ -144,7 +144,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Agentic AI Status */}
-        <AgentStatus />
+        {/* <AgentStatus /> */}
 
         <div className="grid md:grid-cols-3 gap-6">
           {/* Overall Readiness */}
