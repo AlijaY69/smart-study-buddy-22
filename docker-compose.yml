@@ -16,9 +16,10 @@ services:
     build:
       context: .
       dockerfile: frontend.Dockerfile
-    environment:
-      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
-      - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      args:
+        - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+        - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+        - VITE_BACKEND_URL=${VITE_BACKEND_URL}
     ports:
       - "5173:80"
     depends_on:
