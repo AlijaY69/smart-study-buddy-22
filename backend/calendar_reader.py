@@ -1,6 +1,7 @@
 # calendar_reader.py - Fetch events from Google Calendar
 from __future__ import print_function
 import datetime
+import os
 import os.path
 import sys
 from google.oauth2.credentials import Credentials
@@ -12,6 +13,20 @@ from database import insert_event, get_unprocessed_assignments
 # Use full calendar scope (same as google_calendar.py)
 # This allows both reading and writing with the same token
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+def _run_auth_flow(flow):
+    """Run OAuth flow based on environment (local server vs console)."""
+    auth_mode = os.getenv('GOOGLE_AUTH_MODE', 'auto').lower()
+
+    if auth_mode == 'console':
+        return flow.run_console()
+    if auth_mode == 'local_server':
+        return flow.run_local_server(port=0)
+
+    try:
+        return flow.run_local_server(port=0)
+    except Exception:
+        return flow.run_console()
 
 def get_calendar_service():
     """Authenticate with Google Calendar and return the service object."""
@@ -79,7 +94,7 @@ def get_calendar_service():
 
 
             flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-            creds = flow.run_local_server(port=0)
+            creds = _run_auth_flow(flow)
 
             # Save the new token - smart path resolution
             if token_path:
@@ -178,4 +193,3 @@ def list_and_store_events(days_ahead=90):
 
 if __name__ == '__main__':
     list_and_store_events()
-

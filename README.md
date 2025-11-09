@@ -137,6 +137,7 @@ MONGODB_URI=your_mongodb_connection_string
 
 # Google Calendar
 GOOGLE_CALENDAR_CREDENTIALS_PATH=credentials.json
+GOOGLE_AUTH_MODE=auto  # use 'console' when running headless (Docker, Render, etc.)
 
 # SendGrid (optional)
 SENDGRID_API_KEY=your_sendgrid_api_key

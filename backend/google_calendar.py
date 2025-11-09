@@ -16,6 +16,20 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 load_dotenv()
 FRONTEND_URL = os.getenv('FRONTEND_URL') or os.getenv('PUBLIC_FRONTEND_URL') or 'http://localhost:5173'
 
+def _run_auth_flow(flow):
+    """Run OAuth flow using local server when possible, otherwise console."""
+    auth_mode = os.getenv('GOOGLE_AUTH_MODE', 'auto').lower()
+
+    if auth_mode == 'console':
+        return flow.run_console()
+    if auth_mode == 'local_server':
+        return flow.run_local_server(port=0)
+
+    try:
+        return flow.run_local_server(port=0)
+    except Exception:
+        return flow.run_console()
+
 def get_calendar_service_with_write_access():
     """
     Authenticate with Google Calendar with write permissions.
@@ -80,7 +94,7 @@ def get_calendar_service_with_write_access():
 
 
             flow = InstalledAppFlow.from_client_secrets_file(credentials_path, SCOPES)
-            creds = flow.run_local_server(port=0)
+            creds = _run_auth_flow(flow)
 
             # Save the new token - smart path resolution
             if token_path:
