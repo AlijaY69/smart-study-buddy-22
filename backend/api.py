@@ -32,11 +32,16 @@ frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 allowed_origins = [
     'http://localhost:5173',  # Local development
     'http://localhost:8080',  # Vite preview
-    frontend_url,  # Production frontend URL
-    'https://*.pages.dev'  # Cloudflare Pages preview deployments
+    frontend_url,  # Production frontend URL from environment variable
 ]
 
-CORS(app, origins=allowed_origins, supports_credentials=True)
+# Enable CORS with support for credentials
+CORS(app, 
+     resources={r"/*": {"origins": allowed_origins}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
 # Stop agent gracefully when Flask shuts down
 atexit.register(stop_agent)
