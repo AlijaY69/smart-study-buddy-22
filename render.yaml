@@ -1,43 +1,96 @@
-# Exported from Render on 2025-11-09T13:46:44Z
-version: "1"
-projects:
-- name: My project
-  environments:
-  - name: Production
-    services:
-    - type: web
-      name: studyBuddy
-      runtime: python
-      repo: https://github.com/AlijaY69/smart-study-buddy-22
-      plan: free
-      envVars:
-      - key: VITE_SUPABASE_ANON_KEY
-        sync: false
-      - key: VITE_OPENAI_API_KEY
-        sync: false
-      - key: VITE_SUPABASE_URL
-        sync: false
-      - key: VITE_SUPABASE_PUBLISHABLE_KEY
-        sync: false
-      - key: VITE_SUPABASE_PROJECT_ID
+# Render Blueprint for Smart Study Buddy
+# Deploy using Docker containers
+
+services:
+  # Backend API Service
+  - type: web
+    name: smart-study-buddy-backend
+    runtime: docker
+    repo: https://github.com/AlijaY69/smart-study-buddy-22
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    region: frankfurt
+    plan: free
+    envVars:
+      - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
         sync: false
-      - key: SUPABASE_URL
+      - key: OPENAI_API_KEY
         sync: false
-      - key: MONGODB_CONNECTION_STRING
+      - key: MONGODB_URI
         sync: false
-      - key: SMTP_PORT
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM_EMAIL
         sync: false
       - key: SMTP_SERVER
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SENDER_EMAIL
         sync: false
       - key: SENDER_PASSWORD
         sync: false
+      - key: USER_EMAIL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: PORT
+        value: "5001"
+    healthCheckPath: /
+    autoDeploy: true
+
+  # Background Worker Service (Agentic AI)
+  - type: worker
+    name: smart-study-buddy-worker
+    runtime: docker
+    repo: https://github.com/AlijaY69/smart-study-buddy-22
+    dockerfilePath: ./backend/Dockerfile
+    dockerCommand: python agentic_service.py
+    dockerContext: .
+    region: frankfurt
+    plan: free
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM_EMAIL
+        sync: false
+      - key: SMTP_SERVER
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
       - key: SENDER_EMAIL
+        sync: false
+      - key: SENDER_PASSWORD
         sync: false
       - key: USER_EMAIL
         sync: false
-      region: frankfurt
-      buildCommand: docker compose up -b
-      startCommand: docker compose up -b
-      autoDeployTrigger: commit
+      - key: FRONTEND_URL
+        sync: false
+    autoDeploy: true
+
+  # Frontend Service
+  - type: web
+    name: smart-study-buddy-frontend
+    runtime: docker
+    repo: https://github.com/AlijaY69/smart-study-buddy-22
+    dockerfilePath: ./frontend.Dockerfile
+    dockerContext: .
+    region: frankfurt
+    plan: free
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true
