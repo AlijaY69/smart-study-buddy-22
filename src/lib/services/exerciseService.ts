@@ -30,6 +30,11 @@ export const exerciseService = {
     const exercises = [];
     const total = exerciseTypes.length;
 
+    // Report initial progress (0 of total) so UI knows the total immediately
+    if (onProgress) {
+      onProgress(0, total);
+    }
+
     // Generate exercises
     for (let i = 0; i < exerciseTypes.length; i++) {
       const exerciseType = exerciseTypes[i];

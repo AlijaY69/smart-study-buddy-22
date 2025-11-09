@@ -189,16 +189,21 @@ export default function SessionPage() {
                 <>
                   <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
                   <h3 className="text-lg font-semibold mb-2">Generating Exercises...</h3>
-                  {generationProgress.total > 0 && (
+                  {generationProgress.total > 0 ? (
                     <>
                       <p className="text-muted-foreground mb-4">
-                        Generating question {generationProgress.current} of {generationProgress.total}
+                        {generationProgress.current === 0
+                          ? `Preparing to generate ${generationProgress.total} questions...`
+                          : `Generating question ${generationProgress.current} of ${generationProgress.total}`
+                        }
                       </p>
                       <Progress
                         value={(generationProgress.current / generationProgress.total) * 100}
                         className="max-w-xs mx-auto"
                       />
                     </>
+                  ) : (
+                    <p className="text-muted-foreground">Starting generation...</p>
                   )}
                 </>
               ) : (
