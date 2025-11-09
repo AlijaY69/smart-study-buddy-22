@@ -2,10 +2,17 @@
 
 An intelligent AI-powered study companion that automatically detects assignments from your Google Calendar and generates personalized study sessions with adaptive exercises.
 
+
 ## Running the project
 In the main project directory run:
 ```bash
 docker compose up --build
+```
+
+## Use the following mock credentials to log in (it does not work for an arbitrary email due to Google security concerns)
+```bash
+doe839319@gmail.com
+h@ckathon!2#
 ```
 
 ## Features
