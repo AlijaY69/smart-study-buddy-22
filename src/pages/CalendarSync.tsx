@@ -91,7 +91,7 @@ export default function CalendarSync() {
         // Show created assignments
         if (data.created_assignments && data.created_assignments.length > 0) {
           data.created_assignments.forEach((assignment: any) => {
-            toast.success(`✅ Created: ${assignment.title}`, { duration: 5000 });
+            toast.success(`Created: ${assignment.title}`, { duration: 5000 });
           });
         }
 

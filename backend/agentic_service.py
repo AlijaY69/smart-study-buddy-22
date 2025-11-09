@@ -1,6 +1,7 @@
 # agentic_service.py - Autonomous AI Agent for Proactive Study Support
 """
 This module implements the agentic AI behavior:
+    pass
 1. Automatically syncs calendar every 1 minute
 2. Proactively detects new assignments and creates them in Supabase
 3. Sends personalized email notifications with direct links
@@ -41,22 +42,18 @@ class AgenticStudyCompanion:
     def sync_calendar_task(self):
         """Background task: Sync Google Calendar with MongoDB."""
         try:
-            print("\n" + "="*60)
-            print(f"🤖 [AGENT] Auto-sync started at {datetime.now().strftime('%H:%M:%S')}")
-            print("="*60)
+            pass
             
             success = list_and_store_events(days_ahead=90)
             
             if success:
                 self.last_sync = datetime.now()
-                print(f"✅ [AGENT] Calendar synced successfully")
             else:
-                print(f"⚠️ [AGENT] Calendar sync had issues")
+                pass
                 
-            print("="*60 + "\n")
             
         except Exception as e:
-            print(f"❌ [AGENT] Sync error: {str(e)}")
+            pass
     
     def get_user_id_from_email(self, email):
         """Get user ID from Supabase by email using REST API."""
@@ -72,7 +69,6 @@ class AgenticStudyCompanion:
                     return result[0]['id']
             return None
         except Exception as e:
-            print(f"⚠️ [AGENT] Error getting user ID: {str(e)}")
             return None
     
     def check_and_notify_task(self):
@@ -81,18 +77,14 @@ class AgenticStudyCompanion:
         This is the core 'agentic' behavior - the AI takes initiative.
         """
         try:
-            print("\n" + "="*60)
-            print(f"🧠 [AGENT] Checking for upcoming exams at {datetime.now().strftime('%H:%M:%S')}")
-            print("="*60)
+            pass
             
             # First, sync any unprocessed assignments to Supabase
             user_id = self.get_user_id_from_email(USER_EMAIL)
             if user_id:
                 unprocessed = get_unprocessed_assignments()
                 if unprocessed:
-                    print(f"🔄 [AGENT] Syncing {len(unprocessed)} new assignments to Supabase...")
                     created_assignments = sync_calendar_to_assignments(user_id)
-                    print(f"✅ [AGENT] Created {len(created_assignments)} assignments in 'Your assignments' tab")
 
                     # Send email notification for each new assignment
                     for assignment in created_assignments:
@@ -111,35 +103,25 @@ class AgenticStudyCompanion:
                             if email_sent:
                                 # Mark notification as sent in Supabase
                                 mark_assignment_notification_sent(assignment['id'])
-                                print(f"📧 [AGENT] Notification sent for: {assignment['title']}")
                             else:
-                                print(f"⚠️ [AGENT] Failed to send notification for: {assignment['title']}")
+                                pass
                         except Exception as e:
-                            print(f"❌ [AGENT] Error sending notification: {str(e)}")
                             continue
             else:
                 unprocessed = get_unprocessed_assignments()
                 if unprocessed:
-                    print(f"⚠️ [AGENT] User '{USER_EMAIL}' not found in Supabase.")
-                    print(f"   📝 {len(unprocessed)} assignments are waiting to sync.")
-                    print(f"   👉 Please log in to the app first:")
-                    print(f"      http://localhost:8080/auth")
-                    print(f"      Use email: {USER_EMAIL}")
-                    print(f"   ✅ Assignments will sync automatically once you're logged in!")
+                    pass
             
             # Disabled: Old exam reminder system
             # Now only send notification when new assignment is first detected (above)
             # No additional reminders are sent
-            print("✅ [AGENT] Assignment notifications handled during sync")
-            print("="*60 + "\n")
             
         except Exception as e:
-            print(f"❌ [AGENT] Check and notify error: {str(e)}")
+            pass
     
     def start(self):
         """Start the autonomous agent."""
         if self.is_running:
-            print("⚠️ Agent is already running")
             return
         
         # Check if scheduler is already running (from previous instance)
@@ -149,14 +131,6 @@ class AgenticStudyCompanion:
             except:
                 pass
         
-        print("\n" + "="*60)
-        print("🤖 STARTING AGENTIC STUDY COMPANION")
-        print("="*60)
-        print(f"📧 User Email: {USER_EMAIL}")
-        print(f"⏰ Sync Interval: Every {SYNC_INTERVAL_MINUTES} minutes")
-        print(f"🔍 Monitoring: Exams within {CHECK_DAYS_AHEAD} days")
-        print(f"🧠 AI Mode: AUTONOMOUS (Proactive Notifications)")
-        print("="*60 + "\n")
         
         try:
             # Remove existing jobs if any
@@ -190,13 +164,7 @@ class AgenticStudyCompanion:
                 self.scheduler.start()
             self.is_running = True
             
-            print("✅ Agentic AI Agent is now active!")
-            print(f"   Next sync: {datetime.now().strftime('%H:%M:%S')}")
-            print(f"   Next check: {(datetime.now() + timedelta(minutes=1)).strftime('%H:%M:%S')}")
-            print("\n")
         except Exception as e:
-            print(f"⚠️ Error starting agent: {str(e)}")
-            print("   Agent will retry on next request")
             self.is_running = False
     
     def stop(self):
@@ -208,10 +176,9 @@ class AgenticStudyCompanion:
             if self.scheduler.running:
                 self.scheduler.shutdown(wait=False)
         except Exception as e:
-            print(f"⚠️ Error stopping scheduler: {str(e)}")
+            pass
         
         self.is_running = False
-        print("\n🛑 Agentic AI Agent stopped")
     
     def get_status(self):
         """Get current agent status."""
@@ -245,7 +212,6 @@ def get_agent_status():
 
 if __name__ == '__main__':
     # Test the agent
-    print("Testing Agentic Study Companion...")
     start_agent()
     
     try:
@@ -254,6 +220,5 @@ if __name__ == '__main__':
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\n\nStopping agent...")
         stop_agent()
 

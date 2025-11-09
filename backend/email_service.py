@@ -29,17 +29,13 @@ def send_new_assignment_notification(user_email, assignment_details):
     sender_email = os.getenv('SENDER_EMAIL')
     sender_password = os.getenv('SENDER_PASSWORD', '').strip().replace(' ', '')
 
-    print(f"🔍 [EMAIL] Checking credentials for new assignment notification...")
-    print(f"   SENDER_EMAIL: {sender_email}")
 
     if not sender_email or not sender_password:
-        print("❌ Email credentials not configured!")
-        print(f"   📝 Configure backend/.env with SENDER_EMAIL and SENDER_PASSWORD")
         return False
 
     # Create email message
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = f"🎯 New Assignment Detected: {assignment_details['title']}"
+    msg['Subject'] = f" New Assignment Detected: {assignment_details['title']}"
     msg['From'] = f"Study Companion AI <{sender_email}>"
     msg['To'] = user_email
 
@@ -49,34 +45,37 @@ def send_new_assignment_notification(user_email, assignment_details):
 
     # Email body (plain text)
     text_body = f"""
-Hi there! 👋
+Hi there! 
 
 Great news! I've detected a new assignment from your calendar:
+    pass
 
-📚 Assignment: {assignment_details['title']}
-📅 Due Date: {assignment_details['date']}
-📝 Type: {assignment_details['type'].title()}
+ Assignment: {assignment_details['title']}
+ Due Date: {assignment_details['date']}
+ Type: {assignment_details['type'].title()}
 
-🎯 NEXT STEP: Upload Your Study Materials
+ NEXT STEP: Upload Your Study Materials
 
 To create a personalized study plan with practice questions, I need you to:
+    pass
 
 1. Click the link below to go directly to this assignment
 2. Upload your study materials:
-   🔹 Lecture slides
-   🔹 Course syllabus/instructions
-   🔹 Practice problems or past exams
-   🔹 Any other relevant study materials
+    Lecture slides
+    Course syllabus/instructions
+    Practice problems or past exams
+    Any other relevant study materials
 3. Click "Create Study Plan" to generate your personalized schedule
 
-👉 Upload materials here: {assignment_url}
+ Upload materials here: {assignment_url}
 
 Once you upload the materials, I'll automatically:
-✅ Generate a personalized study schedule
-✅ Create practice questions based on your materials
-✅ Track your progress and adapt difficulty
+    pass
+ Generate a personalized study schedule
+ Create practice questions based on your materials
+ Track your progress and adapt difficulty
 
-Let's prepare for success! 🚀
+Let's prepare for success! 
 
 Best,
 Your Study Companion AI
@@ -106,21 +105,21 @@ This is an automated notification. Your assignment was detected from your Google
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 New Assignment Detected!</h1>
+            <h1> New Assignment Detected!</h1>
             <p style="font-size: 18px; margin: 10px 0 0 0;">Your AI Study Companion is ready to help</p>
         </div>
         <div class="content">
-            <p>Hi there! 👋</p>
+            <p>Hi there! </p>
 
             <p><strong>Great news!</strong> I've detected a new assignment from your calendar:</p>
 
             <div class="assignment-card">
-                <h2 style="margin: 0 0 10px 0; color: #667eea;">📚 {assignment_details['title']}</h2>
-                <p style="margin: 5px 0;"><strong>📅 Due Date:</strong> {assignment_details['date']}</p>
-                <p style="margin: 5px 0;"><strong>📝 Type:</strong> {assignment_details['type'].title()}</p>
+                <h2 style="margin: 0 0 10px 0; color: #667eea;"> {assignment_details['title']}</h2>
+                <p style="margin: 5px 0;"><strong> Due Date:</strong> {assignment_details['date']}</p>
+                <p style="margin: 5px 0;"><strong> Type:</strong> {assignment_details['type'].title()}</p>
             </div>
 
-            <h3 style="color: #667eea;">🎯 NEXT STEP: Upload Your Study Materials</h3>
+            <h3 style="color: #667eea;"> NEXT STEP: Upload Your Study Materials</h3>
 
             <p>To create a personalized study plan with practice questions, please follow these steps:</p>
 
@@ -137,22 +136,22 @@ This is an automated notification. Your assignment was detected from your Google
             </div>
 
             <div class="materials-list">
-                <strong>📂 Materials I can work with:</strong>
+                <strong> Materials I can work with:</strong>
                 <ul style="margin: 10px 0;">
-                    <li>🔹 Lecture slides (PDF, PowerPoint)</li>
-                    <li>🔹 Course syllabus/instructions</li>
-                    <li>🔹 Practice problems or past exams</li>
-                    <li>🔹 Textbook chapters or notes</li>
-                    <li>🔹 Any other relevant study materials</li>
+                    <li> Lecture slides (PDF, PowerPoint)</li>
+                    <li> Course syllabus/instructions</li>
+                    <li> Practice problems or past exams</li>
+                    <li> Textbook chapters or notes</li>
+                    <li> Any other relevant study materials</li>
                 </ul>
             </div>
 
             <div style="text-align: center;">
-                <a href="{assignment_url}" class="action-button">📖 Upload Materials for This Assignment</a>
+                <a href="{assignment_url}" class="action-button"> Upload Materials for This Assignment</a>
             </div>
 
             <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <strong>✅ Once you upload the materials, I'll automatically:</strong>
+                <strong> Once you upload the materials, I'll automatically:</strong>
                 <ul style="margin: 10px 0;">
                     <li>Generate a personalized study schedule</li>
                     <li>Create practice questions based on your materials</li>
@@ -160,7 +159,7 @@ This is an automated notification. Your assignment was detected from your Google
                 </ul>
             </div>
 
-            <p style="margin-top: 30px; text-align: center; color: #667eea; font-weight: bold;">Let's prepare for success! 🚀</p>
+            <p style="margin-top: 30px; text-align: center; color: #667eea; font-weight: bold;">Let's prepare for success! </p>
 
             <p style="text-align: center; margin-top: 20px;">Best,<br><strong>Your Study Companion AI</strong></p>
         </div>
@@ -181,18 +180,16 @@ This is an automated notification. Your assignment was detected from your Google
 
     # Send email
     try:
-        print(f"📧 Sending new assignment notification to {user_email}...")
+        pass
 
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
             server.login(sender_email, sender_password)
             server.send_message(msg)
 
-        print(f"✅ New assignment notification sent successfully to {user_email}")
         return True
 
     except Exception as e:
-        print(f"❌ Failed to send new assignment notification: {str(e)}")
         return False
 
 
@@ -205,8 +202,8 @@ def send_test_email(user_email):
     if not sender_email or not sender_password:
         return False, "Email credentials not configured"
 
-    msg = MIMEText("Your Study Companion AI is now active and monitoring your calendar! 🚀")
-    msg['Subject'] = "✅ Study Companion AI - Email Notifications Enabled"
+    msg = MIMEText("Your Study Companion AI is now active and monitoring your calendar! ")
+    msg['Subject'] = " Study Companion AI - Email Notifications Enabled"
     msg['From'] = sender_email
     msg['To'] = user_email
 

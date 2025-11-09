@@ -55,14 +55,11 @@ def sync_calendar():
     Body: { "days_ahead": 90 }
     """
     try:
-        print("\n" + "="*60)
-        print("📅 Calendar Sync Request Received")
-        print("="*60)
+        pass
         
         data = request.json or {}
         days_ahead = data.get('days_ahead', 90)
         
-        print(f"📊 Fetching events for next {days_ahead} days...")
         
         success = list_and_store_events(days_ahead)
         
@@ -71,10 +68,6 @@ def sync_calendar():
             all_events = get_all_events()
             unprocessed = get_unprocessed_assignments()
             
-            print(f"✅ Sync complete!")
-            print(f"   Total events: {len(all_events)}")
-            print(f"   Unprocessed assignments: {len(unprocessed)}")
-            print("="*60 + "\n")
             
             return jsonify({
                 'success': True,
@@ -85,8 +78,6 @@ def sync_calendar():
                 }
             })
         else:
-            print("❌ Sync failed")
-            print("="*60 + "\n")
             return jsonify({
                 'success': False,
                 'error': 'Failed to sync calendar'
@@ -94,9 +85,7 @@ def sync_calendar():
             
     except Exception as e:
         error_msg = str(e)
-        print(f"\n❌ Error in sync_calendar: {error_msg}")
         traceback.print_exc()
-        print("="*60 + "\n")
         
         return jsonify({
             'success': False,
@@ -182,7 +171,6 @@ def sync_to_supabase():
             })
         
     except Exception as e:
-        print(f"Error in sync_to_supabase: {e}")
         traceback.print_exc()
         return jsonify({
             'success': False,
@@ -229,7 +217,6 @@ def check_reminders():
         })
         
     except Exception as e:
-        print(f"Error in check_reminders: {e}")
         traceback.print_exc()
         return jsonify({
             'success': False,
@@ -274,7 +261,6 @@ def create_sessions_for_assignment_endpoint(assignment_id):
                 'error': 'user_id is required'
             }), 400
 
-        print(f"\n📚 Creating study sessions for assignment {assignment_id}...")
         sessions_created = create_sessions_for_assignment(assignment_id, user_id)
 
         if sessions_created > 0:
@@ -290,7 +276,6 @@ def create_sessions_for_assignment_endpoint(assignment_id):
             }), 500
 
     except Exception as e:
-        print(f"Error in create_sessions_for_assignment_endpoint: {e}")
         traceback.print_exc()
         return jsonify({
             'success': False,
@@ -421,14 +406,10 @@ def reset_mongodb():
         }), 500
 
 if __name__ == '__main__':
-    print("🚀 Starting Study Companion Calendar API...")
-    print("📍 http://localhost:5001")
-    print("-" * 60)
+    pass
     
     # Start the agentic AI agent
-    print("\n🤖 Initializing Agentic Study Companion...")
     start_agent()
-    print("\n")
     
     # Disable reloader to prevent scheduler conflicts
     # Set use_reloader=False when running with APScheduler

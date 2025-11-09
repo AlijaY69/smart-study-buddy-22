@@ -42,7 +42,6 @@ def get_database():
         _mongo_client.admin.command('ping')
         return _mongo_db
     except Exception as e:
-        print(f"⚠️ MongoDB connection error: {str(e)[:100]}")
         raise
 
 def insert_event(data):
@@ -62,10 +61,8 @@ def insert_event(data):
         data['processed'] = False
         
         result = collection.insert_one(data)
-        print(f"✅ Inserted event with id: {result.inserted_id}")
         return result.inserted_id
     else:
-        print(f"⚠️ Event already exists in database: {data['details']}")
         return existing['_id']
 
 def detect_if_assignment(event_title):
@@ -89,7 +86,7 @@ def detect_if_assignment(event_title):
     if (title_lower.startswith('study:') or
         title_lower.startswith('study -') or
         'study session' in title_lower or
-        title_lower.startswith('📚 study')):
+        title_lower.startswith(' study')):
         return False
 
     return any(keyword in title_lower for keyword in assignment_keywords)
@@ -142,7 +139,6 @@ def mark_assignment_processed(event_id):
         {'_id': event_id},
         {'$set': {'processed': True, 'processed_at': datetime.utcnow()}}
     )
-    print(f"✅ Marked event {event_id} as processed")
 
 def mark_reminder_sent(event_id):
     """Mark that reminder was sent for this assignment."""
@@ -153,7 +149,6 @@ def mark_reminder_sent(event_id):
         {'_id': event_id},
         {'$set': {'reminder_sent': True, 'reminder_sent_at': datetime.utcnow()}}
     )
-    print(f"📧 Marked reminder sent for event {event_id}")
 
 def extract_assignment_info(event_title, event_datetime):
     """
@@ -204,20 +199,16 @@ if __name__ == '__main__':
     # Test connection
     try:
         db = get_database()
-        print("✅ Connected to MongoDB successfully!")
         
         # Show stats
         events_count = db["calendar_events"].count_documents({})
         assignments_count = db["calendar_events"].count_documents({'is_assignment': True})
-        print(f"📊 Total events: {events_count}")
-        print(f"📚 Assignments detected: {assignments_count}")
         
         # Show upcoming assignments
         upcoming = get_upcoming_assignments(30)
-        print(f"\n📅 Upcoming assignments in next 30 days:")
         for assignment in upcoming:
-            print(f"  - {assignment['details']} ({assignment['datetime']})")
+            pass
             
     except Exception as e:
-        print(f"❌ Error connecting to MongoDB: {e}")
+        pass
 
