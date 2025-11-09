@@ -1,15 +1,20 @@
 # google_calendar.py - Create Google Calendar events for study sessions
 from __future__ import print_function
 import datetime
+import os
 import os.path
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
+from dotenv import load_dotenv
 
 # Permission to read AND write calendar events
 # Note: This requires the full calendar scope for creating events
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+
+load_dotenv()
+FRONTEND_URL = os.getenv('FRONTEND_URL') or os.getenv('PUBLIC_FRONTEND_URL') or 'http://localhost:5173'
 
 def get_calendar_service_with_write_access():
     """
@@ -208,14 +213,14 @@ def find_best_available_time(service, preferred_date, preferred_hour, duration_m
         # Fallback to preferred time
         return preferred_date.replace(hour=preferred_hour, minute=0, second=0, microsecond=0)
 
-def create_calendar_event_for_session(session, assignment_title, frontend_url="http://localhost:8080"):
+def create_calendar_event_for_session(session, assignment_title, frontend_url=None):
     """
     Create a Google Calendar event for a study session.
 
     Args:
         session: dict with session data (id, scheduled_at, duration_min, topics, focus)
         assignment_title: str - title of the assignment
-        frontend_url: str - base URL for the frontend (default: http://localhost:8080)
+        frontend_url: str - optional override for the frontend base URL
 
     Returns:
         event: The created calendar event or None if failed
@@ -247,8 +252,12 @@ def create_calendar_event_for_session(session, assignment_title, frontend_url="h
         focus = session.get('focus', 'study').title()
 
         # Build session URL
+        resolved_frontend_url = (frontend_url or FRONTEND_URL).rstrip('/')
         session_id = session.get('id', '')
-        session_url = f"{frontend_url}/sessions/{session_id}" if session_id else f"{frontend_url}/assignments"
+        if session_id:
+            session_url = f"{resolved_frontend_url}/sessions/{session_id}"
+        else:
+            session_url = f"{resolved_frontend_url}/assignments"
 
         # Create event description
         description = f""" Study Session for {assignment_title}
@@ -294,14 +303,14 @@ This study session was automatically scheduled by your AI Study Companion.
         traceback.print_exc()
         return None
 
-def create_calendar_events_for_sessions(sessions, assignment_title, frontend_url="http://localhost:8080"):
+def create_calendar_events_for_sessions(sessions, assignment_title, frontend_url=None):
     """
     Create Google Calendar events for multiple study sessions.
 
     Args:
         sessions: list of session dicts
         assignment_title: str - title of the assignment
-        frontend_url: str - base URL for the frontend
+        frontend_url: str - optional override for the frontend base URL
 
     Returns:
         int: Number of events successfully created

@@ -18,6 +18,7 @@ DEFAULT_TIMEZONE = 'Europe/Amsterdam'  # CET/CEST
 # Supabase configuration
 SUPABASE_URL = os.getenv('SUPABASE_URL', os.getenv('VITE_SUPABASE_URL', 'https://lcpexhkqaqftaqdtgebp.supabase.co'))
 SUPABASE_KEY = os.getenv('SUPABASE_KEY', os.getenv('VITE_SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjcGV4aGtxYXFmdGFxZHRnZWJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MTcwNDIsImV4cCI6MjA3ODE5MzA0Mn0.z6pY_kCftjr1hT6zW7qCVEYHc4D0X8HLAuk_6N2IbcY'))
+FRONTEND_URL = os.getenv('FRONTEND_URL') or os.getenv('PUBLIC_FRONTEND_URL') or 'http://localhost:5173'
 
 def get_supabase_client():
     """Get Supabase client - using REST API directly to avoid version issues."""
@@ -224,7 +225,7 @@ def create_study_sessions_for_assignment(client, user_id, assignment_id, assignm
                 calendar_events_created = create_calendar_events_for_sessions(
                     created_sessions,
                     assignment_title,
-                    frontend_url="http://localhost:8080"
+                    frontend_url=FRONTEND_URL
                 )
             except Exception as calendar_error:
                 # Don't fail the whole process if calendar creation fails
@@ -498,4 +499,3 @@ if __name__ == '__main__':
         check_and_sync_for_user(user_email)
     else:
         pass
-

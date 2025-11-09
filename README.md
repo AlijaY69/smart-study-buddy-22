@@ -150,6 +150,45 @@ BACKEND_URL=http://localhost:5001
 USER_EMAIL=your.email@example.com
 ```
 
+`FRONTEND_URL` is used when generating email links and Google Calendar events. Set it to a URL that your users can actually open (e.g., `https://yourapp.com`) instead of `localhost` when sharing externally.
+
+## Docker Setup
+
+1. **Create environment files**
+   - Copy `backend/env.example` to `backend/.env` and fill in secrets (Supabase, MongoDB, OpenAI, SMTP, etc.).
+   - Create `.env` in the project root for `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. These values are injected at build time.
+2. **Ensure Google credentials exist**
+   - Place `credentials.json` and (if already authorized) `token.json` inside `backend/`. They are mounted into the backend container read-only.
+3. **Build containers**
+
+   ```bash
+   docker compose build
+   ```
+
+4. **Run the stack**
+
+   ```bash
+   docker compose up -d
+   ```
+
+   - Backend is available at http://localhost:5001.
+   - Frontend is served at http://localhost:5173 (nginx serving the Vite build).
+
+5. **View logs / debug**
+
+   ```bash
+   docker compose logs -f backend
+   docker compose logs -f frontend
+   ```
+
+6. **Stop containers**
+
+   ```bash
+   docker compose down
+   ```
+
+For local iteration you can bind-mount `./backend:/app/backend` in `docker-compose.yml` to enable live-reload style edits, then restart the backend service when dependencies change.
+
 ### 5. Set Up Google Calendar API
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)

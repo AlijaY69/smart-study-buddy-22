@@ -24,6 +24,7 @@ app = Flask(__name__)
 frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
 allowed_origins = [
     'http://localhost:5173',  # Local development
+    'http://0.0.0.0:5173',    # Dockerized frontend served via 0.0.0.0
     'http://localhost:8080',  # Vite preview
     frontend_url,  # Production frontend URL
     'https://*.pages.dev'  # Cloudflare Pages preview deployments
@@ -433,4 +434,3 @@ if __name__ == '__main__':
     # Disable reloader to prevent scheduler conflicts
     # Set use_reloader=False when running with APScheduler
     app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
-
