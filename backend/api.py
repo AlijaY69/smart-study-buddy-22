@@ -18,6 +18,13 @@ import traceback
 import atexit
 import os
 
+# Setup Google Calendar credentials from environment variables (if provided)
+try:
+    from setup_credentials import setup_google_credentials
+    setup_google_credentials()
+except Exception as e:
+    print(f"Warning: Could not setup Google credentials: {e}")
+
 app = Flask(__name__)
 
 # Configure CORS for both local development and production
